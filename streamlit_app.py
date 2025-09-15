@@ -239,7 +239,7 @@ def handle_query(search_index: SearchIndex, query: str, top_k: int = 5) -> str:
         lines = []
         for idx, score in sem:
             r = df.iloc[idx]
-            lines.append(f"Match (score {score:.3f}):\nTopic: {r['topic']}\nExplanation: {r['explanation']}\nDate: {r.get('date','')}\nCategory: {r.get('category','')}\nPPT: {r.get('reference material','')}\nRecording: {r.get('session recording','')}")
+            lines.append(f"Topic: {r['topic']}\nExplanation: {r['explanation']}\nDate: {r.get('date','')}\nCategory: {r.get('category','')}\nPPT: {r.get('reference material','')}\nRecording: {r.get('session recording','')}")
         return "\n\n---\n\n".join(lines)
     elif intent == "dates_for_keyword" and arg:
         dates = dates_for_keyword(df, arg)
