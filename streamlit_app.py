@@ -55,7 +55,9 @@ def load_all_excels(folder: str) -> pd.DataFrame:
             combined[req] = None
     # Clean up types
     try:
-        combined["date"] = pd.to_datetime(combined["date"], errors="coerce").dt.date
+        # combined["date"] = pd.to_datetime(combined["date"], errors="coerce").dt.date
+        combined["date"] = pd.to_datetime(combined["date"], format="%B %d, %Y", errors="coerce").dt.date
+
     except Exception:
         pass
     combined["topic"] = combined["topic"].astype(str).str.strip()
@@ -269,11 +271,10 @@ def handle_query(search_index: SearchIndex, query: str, top_k: int = 5) -> str:
 # -------------------------
 def main():
     st.set_page_config(page_title="Training Sessions Chatbot", layout="wide")
-    st.title("📚 Training Sessions Chatbot (Excel → Searchable FAQ)")
-    st.markdown(
+    st.title("💬 AI Learning Hours Assistant")
+    st.write(
         """
-        Use this app to query your training session excel files.
-        Place Excel files in the `excels/` folder (columns: Date, Topic, Explanation, category, reference material, session recording).
+        This is a simple chatbot that can help you with the content discussed during the sessions"
         """
     )
 
@@ -290,10 +291,10 @@ def main():
         st.session_state["idx_obj"] = idx_obj
 
     if refresh:
-        with st.spinner("Loading excels and building index..."):
+        with st.spinner("Loading data and building index..."):
             df = load_all_excels(data_dir)
             if df.empty:
-                st.error(f"No Excel files found in {data_dir}. Put your files there and try again.")
+                st.error(f"No data files found in {data_dir}. Put your files there and try again.")
                 return
             st.session_state["df"] = df
             idx_obj.build(df)
@@ -317,40 +318,41 @@ def main():
     st.sidebar.markdown("Example queries:")
     st.sidebar.markdown(
         """
-        - list topics\n- list topics in security\n- explain threat modeling\n- dates for data privacy\n- ppt for incident response\n- recording for monitoring
+        - list topics\n- list topics from any session \n- list the model releases\n- list the discussions in any category\n- what's new about anything\n- PPT or recording for any session
         """
     )
 
     # Main: Chat interface
     st.header("Ask about sessions")
-    query = st.text_input("Enter your question or command", key="query_input")
-    top_k = st.slider("Number of results to return (semantic)", min_value=1, max_value=10, value=5)
-    if st.button("Ask") and query:
+    query = st.chat_input("Ask anything", key="query_input")
+    # top_k = st.slider("Number of results to return (semantic)", min_value=1, max_value=10, value=5)
+    top_k = 15
+    if query:
         if df is None:
             st.error("No data loaded. Click 'Load & (re)build index' on the sidebar first.")
         else:
             with st.spinner("Searching..."):
                 response = handle_query(idx_obj, query, top_k=top_k)
-                st.markdown("**Response:**")
-                st.text(response)
+                with st.chat_message("assistant"):
+                    st.markdown(response)
 
     # Bonus: quick tables
-    st.header("Browse data")
-    if df is not None:
-        with st.expander("Show raw rows"):
-            st.dataframe(df[["date", "topic", "category", "reference material", "session recording", "__source_file"]].sort_values(by="date", na_position="first"))
+    # st.header("Browse data")
+    # if df is not None:
+    #     with st.expander("Show raw rows"):
+    #         st.dataframe(df[["date", "topic", "category", "reference material", "session recording", "__source_file"]].sort_values(by="date", na_position="first"))
 
-        st.write("Quick: list topics by category")
-        cats = sorted(df["category"].dropna().unique().tolist())
-        cat_choice = st.selectbox("Select category", ["(all)"] + cats)
-        if st.button("Show topics in category"):
-            if cat_choice == "(all)":
-                results = list_topics(df)
-            else:
-                results = topics_in_category(df, cat_choice)
-            st.write(f"Topics ({len(results)}):")
-            for t in results:
-                st.write("- " + t)
+    #     st.write("Quick: list topics by category")
+    #     cats = sorted(df["category"].dropna().unique().tolist())
+    #     cat_choice = st.selectbox("Select category", ["(all)"] + cats)
+    #     if st.button("Show topics in category"):
+    #         if cat_choice == "(all)":
+    #             results = list_topics(df)
+    #         else:
+    #             results = topics_in_category(df, cat_choice)
+    #         st.write(f"Topics ({len(results)}):")
+    #         for t in results:
+    #             st.write("- " + t)
 
 if __name__ == "__main__":
     main()
