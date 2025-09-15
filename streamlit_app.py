@@ -17,7 +17,7 @@ import streamlit as st
 # -------------------------
 # Configuration
 # -------------------------
-DATA_DIR = "data"       # folder with excel files
+DATA_DIR = "test"       # folder with excel files
 INDEX_DIR = "index_data"  # folder to persist index + metadata
 EMBED_MODEL_NAME = "all-MiniLM-L6-v2"  # small, fast, good quality
 
