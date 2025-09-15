@@ -334,7 +334,7 @@ def main():
 
     # Sidebar: load / build / persist
     # st.sidebar.title("Data & Index")
-    data_dir = "data"
+    data_dir = "test"
     # refresh = st.sidebar.button("Load & (re)build index")
     # load_saved = st.sidebar.button("Load saved index (if exists)")
 
