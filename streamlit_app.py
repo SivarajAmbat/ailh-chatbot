@@ -63,7 +63,7 @@ def load_all_excels(folder: str) -> pd.DataFrame:
         invalid = combined[combined["date"].isna()]
         if not invalid.empty:
             st.write("Unparseable date values:")
-            st.write(invalid["original_date_column"])  # Replace with actual column name if needed
+            st.write(invalid["date"])  # Replace with actual column name if needed
 
 
     except Exception:
@@ -315,11 +315,6 @@ def main():
 
     refresh = True
     load_saved = False
-
-    st.write(data_dir)
-    st.write(refresh)
-    st.write(load_saved)
-
 
     # instantiate
     idx_obj = st.session_state.get("idx_obj", None)
