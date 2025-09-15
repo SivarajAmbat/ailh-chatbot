@@ -56,36 +56,43 @@ def load_all_excels(folder: str) -> pd.DataFrame:
         if req not in combined.columns:
             combined[req] = None
 
-    # Map short month names to full names (Jan → January, etc.)
+    # Create a map: "Aug" → "August", etc.
     month_map = {month[:3]: month for month in calendar.month_name if month}
-
-    def normalize_month_name(date_str):
+    
+    # Regex pattern to match full month names (e.g. "August 22, 2025")
+    full_month_pattern = re.compile(r"^(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}$")
+    
+    # Function to normalize if not already in full month format
+    def normalize_date_str(date_str):
+        date_str = date_str.strip()
+        if full_month_pattern.match(date_str):
+            return date_str  # Already in correct format
         for short, full in month_map.items():
-            if short in date_str:
-                return date_str.replace(short, full)
+            if re.search(rf"\b{short}\b", date_str):
+                return re.sub(rf"\b{short}\b", full, date_str)
         return date_str
-
-    # Apply normalization
-    combined["date"] = combined["date"].astype(str).str.strip().apply(normalize_month_name)
-
-    # Parse again
+    
+    # Convert to string, apply normalization
+    combined["date"] = combined["date"].astype(str).apply(normalize_date_str)
+    
+    # Parse to datetime (coerce invalid ones), then extract .date
     combined["date"] = pd.to_datetime(combined["date"], errors="coerce").dt.date
     
     # Clean up types
-    try:
-        # combined["date"] = pd.to_datetime(combined["date"], errors="coerce").dt.date
-        # combined["date"] = pd.to_datetime(combined["date"], format="%B %d, %Y", errors="coerce").dt.date
+    # try:
+    #     # combined["date"] = pd.to_datetime(combined["date"], errors="coerce").dt.date
+    #     # combined["date"] = pd.to_datetime(combined["date"], format="%B %d, %Y", errors="coerce").dt.date
 
-        combined["date"] = pd.to_datetime(combined["date"].astype(str).str.strip(), errors="coerce", dayfirst=False).dt.date
+    #     combined["date"] = pd.to_datetime(combined["date"].astype(str).str.strip(), errors="coerce", dayfirst=False).dt.date
 
-        invalid = combined[combined["date"].isna()]
-        if not invalid.empty:
-            st.write("Unparseable date values:")
-            st.write(invalid["date"])  # Replace with actual column name if needed
+    #     invalid = combined[combined["date"].isna()]
+    #     if not invalid.empty:
+    #         st.write("Unparseable date values:")
+    #         st.write(invalid["date"])  # Replace with actual column name if needed
 
 
-    except Exception:
-        pass
+    # except Exception:
+    #     pass
     combined["topic"] = combined["topic"].astype(str).str.strip()
     combined["explanation"] = combined["explanation"].astype(str).str.strip()
     combined["category"] = combined["category"].astype(str).str.strip()
