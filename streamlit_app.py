@@ -307,7 +307,7 @@ def main():
     st.title("💬 AI Learning Hours Assistant")
     st.write(
         """
-        This is a simple chatbot that can help you with the content discussed during the sessions"
+        This is a simple chatbot that can help you with the content discussed during the sessions. V0.12"
         """
     )
 
@@ -349,6 +349,7 @@ def main():
 
 
     if refresh:
+        st.write("loading data from {data_dir}")
         with st.spinner("Please wait. Loading data and building index ..."):
             df = load_all_excels(data_dir)
             if df.empty:
