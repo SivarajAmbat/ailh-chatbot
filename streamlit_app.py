@@ -56,7 +56,15 @@ def load_all_excels(folder: str) -> pd.DataFrame:
     # Clean up types
     try:
         # combined["date"] = pd.to_datetime(combined["date"], errors="coerce").dt.date
-        combined["date"] = pd.to_datetime(combined["date"], format="%B %d, %Y", errors="coerce").dt.date
+        # combined["date"] = pd.to_datetime(combined["date"], format="%B %d, %Y", errors="coerce").dt.date
+
+        combined["date"] = pd.to_datetime(combined["date"].astype(str).str.strip(), errors="coerce").dt.date
+
+        invalid = combined[combined["date"].isna()]
+        if not invalid.empty:
+            print("Unparseable date values:")
+            print(invalid["original_date_column"])  # Replace with actual column name if needed
+
 
     except Exception:
         pass
