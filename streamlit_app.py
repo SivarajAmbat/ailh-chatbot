@@ -4,11 +4,13 @@ import glob
 import re
 import pickle
 from typing import List, Dict, Any, Optional, Tuple
+import calendar
 
 import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 import faiss
+
 
 import streamlit as st
 
@@ -53,6 +55,22 @@ def load_all_excels(folder: str) -> pd.DataFrame:
     for req in required:
         if req not in combined.columns:
             combined[req] = None
+
+    # Map short month names to full names (Jan → January, etc.)
+    month_map = {month[:3]: month for month in calendar.month_name if month}
+
+    def normalize_month_name(date_str):
+        for short, full in month_map.items():
+            if short in date_str:
+                return date_str.replace(short, full)
+        return date_str
+
+    # Apply normalization
+    combined["date"] = combined["date"].astype(str).str.strip().apply(normalize_month_name)
+
+    # Parse again
+    combined["date"] = pd.to_datetime(combined["date"], errors="coerce").dt.date
+    
     # Clean up types
     try:
         # combined["date"] = pd.to_datetime(combined["date"], errors="coerce").dt.date
