@@ -62,8 +62,8 @@ def load_all_excels(folder: str) -> pd.DataFrame:
 
         invalid = combined[combined["date"].isna()]
         if not invalid.empty:
-            print("Unparseable date values:")
-            print(invalid["original_date_column"])  # Replace with actual column name if needed
+            st.write("Unparseable date values:")
+            st.write(invalid["original_date_column"])  # Replace with actual column name if needed
 
 
     except Exception:
@@ -286,17 +286,47 @@ def main():
         """
     )
 
+
+    st.markdown("""
+    <style>
+        /* Override markdown styles to use normal font size */
+        .markdown-text-container h1,
+        .markdown-text-container h2,
+        .markdown-text-container h3,
+        .markdown-text-container h4,
+        .markdown-text-container h5,
+        .markdown-text-container h6 {
+            font-size: 1rem !important;
+            font-weight: normal !important;
+            margin: 0 !important;
+        }
+        .markdown-text-container p {
+            font-size: 1rem !important;
+            margin: 0 !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
     # Sidebar: load / build / persist
     st.sidebar.title("Data & Index")
     data_dir = st.sidebar.text_input("Excel folder", DATA_DIR)
-    refresh = st.sidebar.button("Load & (re)build index")
-    load_saved = st.sidebar.button("Load saved index (if exists)")
+    # refresh = st.sidebar.button("Load & (re)build index")
+    # load_saved = st.sidebar.button("Load saved index (if exists)")
+
+    refresh = True
+    load_saved = False
+
+    st.write(data_dir)
+    st.write(refresh)
+    st.write(load_saved)
+
 
     # instantiate
     idx_obj = st.session_state.get("idx_obj", None)
     if idx_obj is None:
         idx_obj = SearchIndex()
         st.session_state["idx_obj"] = idx_obj
+
 
     if refresh:
         with st.spinner("Loading data and building index..."):
@@ -307,6 +337,8 @@ def main():
             st.session_state["df"] = df
             idx_obj.build(df)
             st.success(f"Loaded {len(df)} rows and built index.")
+            refresh = False
+            load_saved = True
     elif load_saved:
         try:
             idx_obj.load(os.path.join(INDEX_DIR, "faiss.index"), os.path.join(INDEX_DIR, "meta.pkl"))
