@@ -58,7 +58,7 @@ def load_all_excels(folder: str) -> pd.DataFrame:
         # combined["date"] = pd.to_datetime(combined["date"], errors="coerce").dt.date
         # combined["date"] = pd.to_datetime(combined["date"], format="%B %d, %Y", errors="coerce").dt.date
 
-        combined["date"] = pd.to_datetime(combined["date"].astype(str).str.strip(), errors="coerce").dt.date
+        combined["date"] = pd.to_datetime(combined["date"].astype(str).str.strip(), errors="coerce", dayfirst=False).dt.date
 
         invalid = combined[combined["date"].isna()]
         if not invalid.empty:
