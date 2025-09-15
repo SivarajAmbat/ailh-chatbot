@@ -308,8 +308,8 @@ def main():
     """, unsafe_allow_html=True)
 
     # Sidebar: load / build / persist
-    st.sidebar.title("Data & Index")
-    data_dir = st.sidebar.text_input("Excel folder", DATA_DIR)
+    # st.sidebar.title("Data & Index")
+    data_dir = "data"
     # refresh = st.sidebar.button("Load & (re)build index")
     # load_saved = st.sidebar.button("Load saved index (if exists)")
 
@@ -329,10 +329,10 @@ def main():
 
 
     if refresh:
-        with st.spinner("Loading data and building index..."):
+        with st.spinner("Please wait. Loading data and building index ..."):
             df = load_all_excels(data_dir)
             if df.empty:
-                st.error(f"No data files found in {data_dir}. Put your files there and try again.")
+                st.error(f"No data files found in {data_dir} directory. Please contact developer for assistance.")
                 return
             st.session_state["df"] = df
             idx_obj.build(df)
@@ -377,22 +377,22 @@ def main():
                     st.markdown(response)
 
     # Bonus: quick tables
-    # st.header("Browse data")
-    # if df is not None:
-    #     with st.expander("Show raw rows"):
-    #         st.dataframe(df[["date", "topic", "category", "reference material", "session recording", "__source_file"]].sort_values(by="date", na_position="first"))
+    st.header("Browse data")
+    if df is not None:
+        with st.expander("Show raw rows"):
+            st.dataframe(df[["date", "topic", "category", "reference material", "session recording", "__source_file"]].sort_values(by="date", na_position="first"))
 
-    #     st.write("Quick: list topics by category")
-    #     cats = sorted(df["category"].dropna().unique().tolist())
-    #     cat_choice = st.selectbox("Select category", ["(all)"] + cats)
-    #     if st.button("Show topics in category"):
-    #         if cat_choice == "(all)":
-    #             results = list_topics(df)
-    #         else:
-    #             results = topics_in_category(df, cat_choice)
-    #         st.write(f"Topics ({len(results)}):")
-    #         for t in results:
-    #             st.write("- " + t)
+        st.write("Quick: list topics by category")
+        cats = sorted(df["category"].dropna().unique().tolist())
+        cat_choice = st.selectbox("Select category", ["(all)"] + cats)
+        if st.button("Show topics in category"):
+            if cat_choice == "(all)":
+                results = list_topics(df)
+            else:
+                results = topics_in_category(df, cat_choice)
+            st.write(f"Topics ({len(results)}):")
+            for t in results:
+                st.write("- " + t)
 
 if __name__ == "__main__":
     main()
